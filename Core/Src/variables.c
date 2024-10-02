@@ -26,6 +26,7 @@ uint8_t nir_rx[IMG_BUFF];
 
 //pointer//
 uint32_t ptr;
+uint8_t *data_rec;
 
 // Image size//
 uint8_t rgb_img_size[5];

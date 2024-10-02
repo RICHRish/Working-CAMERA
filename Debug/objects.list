@@ -3,6 +3,7 @@
 "./Core/Src/lfs_util.o"
 "./Core/Src/littlefs_driver.o"
 "./Core/Src/main.o"
+"./Core/Src/main_original.o"
 "./Core/Src/nor.o"
 "./Core/Src/nor_ids.o"
 "./Core/Src/stm32f4xx_hal_msp.o"

@@ -31,6 +31,7 @@ extern uint8_t rgb_rx[IMG_BUFF];
 extern uint8_t nir_rx[IMG_BUFF];
 //PONIER//
 extern uint32_t ptr;
+extern uint8_t *data_rec;
 // IMG SIZE//
 extern uint8_t rgb_img_size[5];
 extern uint8_t nir_img_size[5];

@@ -29,5 +29,5 @@ extern DMA_HandleTypeDef hdma_usart6_rx;
 #define DEBUG_UART	    huart2
 
 #define ACK LEN           3
-#define IMG_BUFF        16004
+#define IMG_BUFF        18004
 #endif /* INC_CONFIGURATION_H_ */

@@ -49,8 +49,6 @@ UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart8;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
-DMA_HandleTypeDef hdma_uart4_tx;
-DMA_HandleTypeDef hdma_uart4_rx;
 DMA_HandleTypeDef hdma_uart8_tx;
 DMA_HandleTypeDef hdma_uart8_rx;
 DMA_HandleTypeDef hdma_usart6_tx;
@@ -169,9 +167,8 @@ uint32_t IMAGE_CAPTURE1() {
 //							if(temp == 0xd9) break;
 //						}
 //		}while(1);
-		if (HAL_OK == HAL_UART_Receive_DMA(&huart8, rrr, ptr1-2)) {
-			obc_ok
-
+		if (HAL_OK == HAL_UART_Receive_DMA(&huart8, rrr, ptr1)) {
+			myprintf("Initializing DMA..");
 //			sprintf(log1 , "************************\n\n BUffer data size : %d received\n", ptr1);
 //		HAL_UART_Transmit(&DEBUG_UART1,log1, sizeof(log1), 1000);
 
@@ -263,7 +260,7 @@ int main(void)
 
 		do {
 			if (HAL_UART_Receive(&OBC_UART1, OBC_CMD_RX1, 7, 1000) == HAL_OK) {
-				UART_Flush(&huart4);
+//				UART_Flush(huart4);
 
 				if (OBC_CMD_RX1[0] == 0x53 && OBC_CMD_RX1[1] == 0x0C
 						&& OBC_CMD_RX1[2] == 0x0A && OBC_CMD_RX1[3] == 0X0e
@@ -276,18 +273,13 @@ int main(void)
 				}
 			}
 		} while (1);
+		//		while (!OBC_RX_FLAG) {
+		//			myprintf("waiting for command from OBC.\r\n");
+		//			HAL_Delay(1000);
+		//		}
 		myprintf("Data received from OBC\r\n");
 		HAL_Delay(2000);
-		//		while (!OBC_RX_FLAG) {
-//		//			myprintf("waiting for command from OBC.\r\n");
-//		//			HAL_Delay(1000);
-//		//		}
-		OCP_EN1();
 		IMAGE_CAPTURE1();
-		HAL_UART_Transmit(&OBC_UART1,rrr, sizeof(rrr),1000);
-		HAL_Delay(1000);
-
-//		IMAGE_CAPTURE1();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -531,12 +523,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-  /* DMA1_Stream2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
-  /* DMA1_Stream4_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
   /* DMA1_Stream6_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);

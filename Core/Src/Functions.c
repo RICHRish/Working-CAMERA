@@ -16,6 +16,11 @@
 #ifdef DEBUG_MODE
 #ifndef TRACE_MODE
 
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+//	char log[100];
+//	sprintf(log,"Data received of size %d", sizeof(log));
+//	HAL_UART_Transmit(&DEBUG_UART, log,sizeof(log),1000);
+//}
 int buffersize(char *buff) {
 	int i = 0;
 	while (*buff++ != '\0')
@@ -91,39 +96,58 @@ void OBC_HANDSHAKE() {
 
 uint32_t IMAGE_CAPTURE(){
 	uint8_t CAM_tx[] = { 'C', 'A', 'M', 'O', 'N' };
+	uint32_t size1=0;
+
 
 	HAL_UART_Transmit(&RGB_UART, CAM_tx, sizeof(CAM_tx), 1000);
 	HAL_UART_Transmit(&NIR_UART, CAM_tx, sizeof(CAM_tx),1000);
 	if (HAL_OK
 			== HAL_UART_Receive(&RGB_UART, rgb_img_size, sizeof(rgb_img_size),
-					3000)) {
+					7000)) {
 		HAL_UART_Transmit(&DEBUG_UART,(uint8_t*) "Image size is : ",
 				sizeof("Image size is : "), 1000);
 
-		HAL_UART_Transmit(&DEBUG_UART, rgb_img_size, sizeof(rgb_img_size), 1000);
 		ptr = atoi((char*)rgb_img_size);
+		data_rec = (uint8_t *) malloc(ptr);
+//		HAL_UART_Receive_DMA(&RGB_UART, data_rec, ptr);
+		if(HAL_UART_Receive(&RGB_UART, data_rec, ptr, 1000) == HAL_OK){
+			HAL_UART_Transmit(&RGB_UART, data_rec, ptr,1000);
+		}
+
+
+		HAL_UART_Transmit(&DEBUG_UART, rgb_img_size, sizeof(rgb_img_size), 1000);
 		RGB_CAM = 1;
 		//HAL_Delay(20000);
 
 	}
-
+ char logs[100];
 	while(1){
 		if (RGB_CAM == 1) {
-			do {
+			HAL_UART_Receive_DMA(&RGB_UART, rgb_rx, rgb_img_size);
+//			do {
+//
+//				if (HAL_OK
+//						== HAL_UART_Receive(&RGB_UART, &rgb_img, sizeof(rgb_img),
+//								1000)) {
+//					rgb_rx[rgb++] = rgb_img;
+////					HAL_UART_Transmit(&DEBUG_UART, &rgb_img, sizeof(rgb_img), 1000);
+//					if(rgb%1000 == 0){
+//						sprintf(logs, "\n Data size received is %d",rgb);
+//
+//
+//						HAL_UART_Transmit(&DEBUG_UART, logs, sizeof(logs),1000);
+//					}
+//
+//				}
+//			} while (rgb_img != 0xd9);
 
-				if (HAL_OK
-						== HAL_UART_Receive(&RGB_UART, &rgb_img, sizeof(rgb_img),
-								1000)) {
-					rgb_rx[rgb++] = rgb_img;
-
-					HAL_UART_Transmit(&DEBUG_UART, &rgb_img, sizeof(rgb_img), 1000);
-
-				}
-			} while (rgb_img != 0xd9);
-
-			rgb_rx[rgb++] = '\0';
-				RGB_CAM = 0;
-
+//			rgb_rx[rgb++] = '\0';
+//				RGB_CAM = 0;
+//
+//				HAL_UART_Transmit(&DEBUG_UART, "\nData size received is ", sizeof("\nData size received is "),1000);
+//
+//				HAL_UART_Transmit(&DEBUG_UART, &rgb_rx, sizeof(rgb_rx),1000);
+//           myprintf()
 
 			//		HAL_UART_Transmit(&huart2, rx, strlen(rx), 1000);
 			//		memset(rx, "\0", sizeof(rx));
@@ -134,49 +158,49 @@ uint32_t IMAGE_CAPTURE(){
 			//
 			//		}
 			// Additional processing can be done here
-			HAL_UART_Transmit(&DEBUG_UART, rgb_rx, ptr, 10000);
-			//		x=100;
-			rgb = 0;
+//			HAL_UART_Transmit(&DEBUG_UART, rgb_rx, ptr, 10000);
+//			//		x=100;
+//			rgb = 0;
 
 		}
-		if (HAL_OK
-				== HAL_UART_Receive(&NIR_UART, nir_img_size, sizeof(nir_img_size),
-						3000)) {
-			HAL_UART_Transmit(&DEBUG_UART,(uint8_t*) "Image size is : ",
-					sizeof("Image size is : "), 1000);
-
-			HAL_UART_Transmit(&DEBUG_UART, nir_img_size, sizeof(nir_img_size), 1000);
-			ptr = atoi((char*)nir_img_size);
-			NIR_CAM = 1;
-
-		}
-
-		if (NIR_CAM == 1) {
-			do {
-
-				if (HAL_OK
-						== HAL_UART_Receive(&NIR_UART, &nir_img, sizeof(nir_img),
-								1000)) {
-					nir_rx[nir++] = nir_img;
-
-					HAL_UART_Transmit(&DEBUG_UART, &nir_img, sizeof(nir_img), 1000);
-				}
-			} while (nir_img != 0xd9);
-			nir_rx[nir++] = '\0';
-			NIR_CAM = 0;
-			//		HAL_UART_Transmit(&huart2, rx, strlen(rx), 1000);
-			//		memset(rx, "\0", sizeof(rx));
-			//		while(i<= ptr){
-			//			if(HAL_OK == HAL_UART_Receive(&huart8, &img, sizeof(img), 1000)){
-			//						rx[i++]=img;
-			//					}
-			//
-			//		}
-			// Additional processing can be done here
-			HAL_UART_Transmit(&DEBUG_UART, nir_rx, ptr, 10000);
-			//		x=100;
-			nir = 0;
-		}
+//		if (HAL_OK
+//				== HAL_UART_Receive(&NIR_UART, nir_img_size, sizeof(nir_img_size),
+//						3000)) {
+//			HAL_UART_Transmit(&DEBUG_UART,(uint8_t*) "Image size is : ",
+//					sizeof("Image size is : "), 1000);
+//
+//			HAL_UART_Transmit(&DEBUG_UART, nir_img_size, sizeof(nir_img_size), 1000);
+//			ptr = atoi((char*)nir_img_size);
+//			NIR_CAM = 1;
+//
+//		}
+//
+//		if (NIR_CAM == 1) {
+//			do {
+//
+//				if (HAL_OK
+//						== HAL_UART_Receive(&NIR_UART, &nir_img, sizeof(nir_img),
+//								1000)) {
+//					nir_rx[nir++] = nir_img;
+//
+//					HAL_UART_Transmit(&DEBUG_UART, &nir_img, sizeof(nir_img), 1000);
+//				}
+//			} while (nir_img != 0xd9);
+//			nir_rx[nir++] = '\0';
+//			NIR_CAM = 0;
+//			//		HAL_UART_Transmit(&huart2, rx, strlen(rx), 1000);
+//			//		memset(rx, "\0", sizeof(rx));
+//			//		while(i<= ptr){
+//			//			if(HAL_OK == HAL_UART_Receive(&huart8, &img, sizeof(img), 1000)){
+//			//						rx[i++]=img;
+//			//					}
+//			//
+//			//		}
+//			// Additional processing can be done here
+//			HAL_UART_Transmit(&DEBUG_UART, nir_rx, ptr, 10000);
+//			//		x=100;
+//			nir = 0;
+//		}
 
 	}
 	return 0;
