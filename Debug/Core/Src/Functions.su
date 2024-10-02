@@ -1,0 +1,9 @@
+../Core/Src/Functions.c:19:5:buffersize	24	static
+../Core/Src/Functions.c:25:6:myprintf	16	static
+../Core/Src/Functions.c:51:6:OBC_HANDSHAKE	8	static
+../Core/Src/Functions.c:92:10:IMAGE_CAPTURE	16	static
+../Core/Src/Functions.c:184:7:CS_Enable_RGB	8	static
+../Core/Src/Functions.c:189:7:CS_Disable_RGB	8	static
+../Core/Src/Functions.c:193:7:CS_Enable_NIR	8	static
+../Core/Src/Functions.c:198:7:CS_Disable_NIR	8	static
+../Core/Src/Functions.c:203:7:OCP_EN	8	static
