@@ -2,8 +2,8 @@
 ../Core/Src/Functions.c:30:6:myprintf	16	static
 ../Core/Src/Functions.c:56:6:OBC_HANDSHAKE	8	static
 ../Core/Src/Functions.c:97:10:IMAGE_CAPTURE	120	static
-../Core/Src/Functions.c:208:7:CS_Enable_RGB	8	static
-../Core/Src/Functions.c:213:7:CS_Disable_RGB	8	static
-../Core/Src/Functions.c:217:7:CS_Enable_NIR	8	static
-../Core/Src/Functions.c:222:7:CS_Disable_NIR	8	static
-../Core/Src/Functions.c:227:7:OCP_EN	8	static
+../Core/Src/Functions.c:211:7:CS_Enable_RGB	8	static
+../Core/Src/Functions.c:216:7:CS_Disable_RGB	8	static
+../Core/Src/Functions.c:220:7:CS_Enable_NIR	8	static
+../Core/Src/Functions.c:225:7:CS_Disable_NIR	8	static
+../Core/Src/Functions.c:230:7:OCP_EN	8	static

@@ -57,14 +57,16 @@ DMA_HandleTypeDef hdma_usart6_tx;
 DMA_HandleTypeDef hdma_usart6_rx;
 
 /* USER CODE BEGIN PV */
-
+uint8_t rgb_img1 = 0;
 uint8_t *data_rec1;
 uint32_t ptr1;
-uint8_t rrr[18000] = { '\0' };
+uint8_t Whole_Img_RGB[18000] = { '\0' };
 uint8_t OBC_CMD_RX1[7];
+uint8_t obc_ok =0;
 uint8_t OBC_RX_FLAG1 = 0;
 uint8_t OBC_TX_FLAG1 = 0;
 uint8_t obc_data1, rx_data1[7], i1;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -81,18 +83,39 @@ int buffersize(char *buff);
 void myprintf(const char *fmt, ...);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	char log1[20];
+	if (huart == &RGB_UART1) {
 
-	sprintf(log1, "data size : %d received\n", ptr1);
-	HAL_UART_Transmit(&DEBUG_UART1, "CPLT called: \n",
-			sizeof("CPLT called: \n"), 1000);
-	HAL_UART_Transmit(&DEBUG_UART1, log1, sizeof(log1), 1000);
-//	HAL_UART_Transmit_DMA(&DEBUG_UART1, data_rec1, ptr1);
-	HAL_UART_Transmit(&DEBUG_UART1, rrr, ptr1, 20000);
-//	for(int i=00;i<4000;i++){
-//		HAL_UART_Transmit(&DEBUG_UART1, rrr[i], 1,1000);
-//		HAL_Delay(100);
-//	}
+//		if (HAL_UART_Receive(&huart8, rgb_img_size, sizeof(rgb_img_size), 3000)
+//				== HAL_OK) {
+//			HAL_UART_Transmit(&huart2, "RGB IMAGE SIZE:",
+//					sizeof("RGB IMAGE SIZE:"), 1000);
+//			HAL_UART_Transmit(&huart2, rgb_img_size, sizeof(rgb_img_size),
+//					1000);
+//			ptr = atoi((char*) rgb_img_size);
+			rgb_img1 = 1;
+
+			HAL_UART_Receive_DMA(&huart8, Whole_Img_RGB, ptr1);
+			int loop = 0;
+
+			char log1[20];
+			uint16_t data_size = 4000;
+			uint8_t temp[data_size];
+			loop = ptr1 / data_size;
+			HAL_UART_Transmit(&huart2, "\n\n********Reading Image data****\n",
+					sizeof("\n\n********Reading Image data****\n") - 1, 1000);
+
+			if (Whole_Img_RGB[ptr1 - 2] == 0xFF
+					&& Whole_Img_RGB[ptr1 - 1] == 0xD9) {
+				myprintf(
+						"End marker (0xFF, 0xD9) detected, Image received successfully.\n");
+								obc_ok = 0;
+			} else {
+				myprintf(
+						"Warning: End marker (0xFF, 0xD9) not found. Data might be incomplete.\n");
+			}
+			rgb_img1 = 0;
+			myprintf("Ready to receive next image size.\n");
+
 
 }
 void OBC_HANDSHAKE1() {
@@ -117,36 +140,38 @@ uint32_t IMAGE_CAPTURE1() {
 
 	uint32_t size1 = 0;
 	uint8_t rgb_img_size[6];
-//	data_rec1 = rrr;
+	data_rec1 = Whole_Img_RGB;
 	char log1[30];
 	UART_Flush(&huart2);
 	UART_Flush(&huart8);
 	UART_Flush_DMA(&huart8);
 	HAL_UART_Transmit(&RGB_UART1, CAM_tx, sizeof(CAM_tx), 1000);
-	HAL_UART_Transmit(&NIR_UART1, CAM_tx, sizeof(CAM_tx), 1000);
+//	HAL_UART_Transmit(&NIR_UART1, CAM_tx, sizeof(CAM_tx), 1000);
 
-	if (HAL_OK
-			== HAL_UART_Receive(&RGB_UART1, rgb_img_size, sizeof(rgb_img_size),
-					7000)) {
-		HAL_UART_Transmit(&DEBUG_UART1, (uint8_t*) "Image size is : ",
-				sizeof("Image size is : "), 1000);
+    if (HAL_UART_Receive(&huart8, rgb_img_size, sizeof(rgb_img_size), 5000) == HAL_OK) {
+    	HAL_UART_Transmit(&huart2, "RGB IMAGE SIZE:", sizeof("RGB IMAGE SIZE:"), 1000);
+    	HAL_UART_Transmit(&huart2, rgb_img_size, sizeof(rgb_img_size), 1000);
+        ptr1 = atoi((char*) rgb_img_size);
+//        Whole_Img_RGB = (uint8_t*) malloc(ptr1);
+        HAL_UART_Receive_DMA(&huart8, Whole_Img_RGB, ptr1);
 
-		ptr1 = atoi((char*) rgb_img_size);
-		data_rec1 = (uint8_t*) malloc(ptr1);
+	if (rgb_img1 == 1){
+				int len = snprintf(log1, sizeof(log1), " %lu bytes\n", ptr1);
+				HAL_UART_Transmit(&huart4, (uint8_t*) "Image size is: ",
+						sizeof("Image size is: "), 1000);
+				HAL_UART_Transmit(&huart4, (uint8_t*) log1, len, 1000);
+
+	}
+
+	}
+
 //		HAL_UART_Receive_DMA(&RGB_UART1, rrr, ptr1);
 //		if(HAL_UART_Receive(&RGB_UART1, rrr, ptr1, 10000) == HAL_OK){
 ////					HAL_UART_Transmit(&RGB_UART, data_rec, ptr,1000);
 //			sprintf(log1 , "data size : %d received\n", ptr1);
 //				HAL_UART_Transmit(&DEBUG_UART1,log1, sizeof(log1), 1000);
 //				}
-		int loop = 0;
 
-		char log1[20];
-		uint16_t data_size = 4000;
-		uint8_t temp[data_size];
-		loop = ptr1 / data_size;
-		HAL_UART_Transmit(&huart2, "\n\n********Reading Image data****\n",
-				sizeof("\n\n********Reading Image data****\n") - 1, 1000);
 //		do{
 //			if(HAL_UART_Receive(&RGB_UART1, temp, sizeof(temp),1000) == HAL_OK){
 //
@@ -169,14 +194,14 @@ uint32_t IMAGE_CAPTURE1() {
 //							if(temp == 0xd9) break;
 //						}
 //		}while(1);
-		if (HAL_OK == HAL_UART_Receive_DMA(&huart8, rrr, ptr1-2)) {
-			obc_ok
+//		if (HAL_OK == HAL_UART_Receive_DMA(&huart8, rrr, ptr1-2)) {
+//
 
 //			sprintf(log1 , "************************\n\n BUffer data size : %d received\n", ptr1);
 //		HAL_UART_Transmit(&DEBUG_UART1,log1, sizeof(log1), 1000);
 
 //		HAL_UART_Transmit(&DEBUG_UART1, rrr, ptr1-1, 1000);
-		}
+//		}
 //		RGB_CAM = 1;
 		//HAL_Delay(20000);
 
@@ -258,34 +283,36 @@ int main(void)
 	while (1) {
 
 //
-		OBC_HANDSHAKE1();
-		OBC_RX_FLAG1 = 0;
-
-		do {
-			if (HAL_UART_Receive(&OBC_UART1, OBC_CMD_RX1, 7, 1000) == HAL_OK) {
-				UART_Flush(&huart4);
-
-				if (OBC_CMD_RX1[0] == 0x53 && OBC_CMD_RX1[1] == 0x0C
-						&& OBC_CMD_RX1[2] == 0x0A && OBC_CMD_RX1[3] == 0X0e
-						&& OBC_CMD_RX1[4] == 0X01 && OBC_CMD_RX1[5] == 0X7e) {
-					HAL_UART_Transmit(&OBC_UART1, OBC_CMD_RX1,
-							sizeof(OBC_CMD_RX1), 1000);
-//									OCP_EN1();
-					OBC_RX_FLAG1 = 1;
-					break;
-				}
-			}
-		} while (1);
-		myprintf("Data received from OBC\r\n");
-		HAL_Delay(2000);
+//		OBC_HANDSHAKE1();
+//		OBC_RX_FLAG1 = 0;
+//
+//		do {
+//			if (HAL_UART_Receive(&OBC_UART1, OBC_CMD_RX1, 7, 1000) == HAL_OK) {
+//				UART_Flush(&huart4);
+//
+//				if (OBC_CMD_RX1[0] == 0x53 && OBC_CMD_RX1[1] == 0x0C
+//						&& OBC_CMD_RX1[2] == 0x0A && OBC_CMD_RX1[3] == 0X0e
+//						&& OBC_CMD_RX1[4] == 0X01 && OBC_CMD_RX1[5] == 0X7e) {
+//					HAL_UART_Transmit(&OBC_UART1, OBC_CMD_RX1,
+//							sizeof(OBC_CMD_RX1), 1000);
+////									OCP_EN1();
+//					OBC_RX_FLAG1 = 1;
+//					break;
+//				}
+//			}
+//		} while (1);
+//		myprintf("Data received from OBC\r\n");
+//		HAL_Delay(2000);
 		//		while (!OBC_RX_FLAG) {
 //		//			myprintf("waiting for command from OBC.\r\n");
 //		//			HAL_Delay(1000);
 //		//		}
 		OCP_EN1();
 		IMAGE_CAPTURE1();
-		HAL_UART_Transmit(&OBC_UART1,rrr, sizeof(rrr),1000);
-		HAL_Delay(1000);
+//		if (obc_ok == 1){
+//			//HAL_UART_Transmit(&OBC_UART1,rrr, sizeof(rrr),1000);
+//		}
+//		HAL_Delay(1000);
 
 //		IMAGE_CAPTURE1();
     /* USER CODE END WHILE */

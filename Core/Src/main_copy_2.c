@@ -1,3 +1,9 @@
+///*
+// * main_copy_2.c
+// *
+// *  Created on: Oct 3, 2024
+// *      Author: kriti
+// */
 ///* USER CODE BEGIN Header */
 ///**
 // ******************************************************************************
@@ -21,12 +27,7 @@
 //
 ///* Private includes ----------------------------------------------------------*/
 ///* USER CODE BEGIN Includes */
-//#include <stdlib.h>
-//#include <configuration.h>
-//#include <variables.h>
-//#include <functions.h>
-//#include <littlefs_driver.h>
-//
+//#include <stdarg.h>
 ///* USER CODE END Includes */
 //
 ///* Private typedef -----------------------------------------------------------*/
@@ -36,7 +37,10 @@
 //
 ///* Private define ------------------------------------------------------------*/
 ///* USER CODE BEGIN PD */
-//
+//#define DEBUG_UART1 huart2
+//#define RGB_UART1 huart8
+//#define NIR_UART1 huart6
+//#define OBC_UART1 huart4
 ///* USER CODE END PD */
 //
 ///* Private macro -------------------------------------------------------------*/
@@ -51,6 +55,8 @@
 //UART_HandleTypeDef huart8;
 //UART_HandleTypeDef huart2;
 //UART_HandleTypeDef huart6;
+//DMA_HandleTypeDef hdma_uart4_tx;
+//DMA_HandleTypeDef hdma_uart4_rx;
 //DMA_HandleTypeDef hdma_uart8_tx;
 //DMA_HandleTypeDef hdma_uart8_rx;
 //DMA_HandleTypeDef hdma_usart6_tx;
@@ -58,9 +64,14 @@
 //
 ///* USER CODE BEGIN PV */
 //
-//
-//uint8_t data[20];
-//
+//uint8_t *data_rec1;
+//uint32_t ptr1;
+//uint8_t rrr[18000] = { '\0' };
+//uint8_t OBC_CMD_RX1[7];
+//uint8_t obc_ok =0;
+//uint8_t OBC_RX_FLAG1 = 0;
+//uint8_t OBC_TX_FLAG1 = 0;
+//uint8_t obc_data1, rx_data1[7], i1;
 ///* USER CODE END PV */
 //
 ///* Private function prototypes -----------------------------------------------*/
@@ -73,6 +84,135 @@
 //static void MX_UART4_Init(void);
 //static void MX_SPI2_Init(void);
 ///* USER CODE BEGIN PFP */
+//int buffersize(char *buff);
+//void myprintf(const char *fmt, ...);
+//
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+//	char log1[20];
+//
+//	sprintf(log1, "data size : %d received\n", ptr1);
+//	HAL_UART_Transmit(&DEBUG_UART1, "CPLT called: \n",
+//			sizeof("CPLT called: \n"), 1000);
+//	HAL_UART_Transmit(&DEBUG_UART1, log1, sizeof(log1), 1000);
+////	HAL_UART_Transmit_DMA(&DEBUG_UART1, data_rec1, ptr1);
+//	HAL_UART_Transmit(&DEBUG_UART1, rrr, ptr1, 20000);
+//	obc_ok = 1;
+////	for(int i=00;i<4000;i++){
+////		HAL_UART_Transmit(&DEBUG_UART1, rrr[i], 1,1000);
+////		HAL_Delay(100);
+////	}
+//
+//}
+//void OBC_HANDSHAKE1() {
+//	while (OBC_RX_FLAG1 != 1) {
+//		if (HAL_UART_Receive(&huart4, &obc_data1, 1, 1000) == HAL_OK) {
+//			HAL_UART_Transmit(&DEBUG_UART1, &obc_data1, 1, 100);
+//			rx_data1[i1++] = obc_data1;
+//			i1 = i1 % 8;
+//			if (i1 == 7)
+//				OBC_RX_FLAG1 = 1;
+//		}
+//
+//	}
+//	if (OBC_RX_FLAG1 == 1) {
+//		HAL_UART_Transmit(&huart4, rx_data1, sizeof(rx_data1), 1000);
+//		HAL_UART_Transmit(&DEBUG_UART1, &rx_data1, 1, 100);
+//	}
+//}
+//
+//uint32_t IMAGE_CAPTURE1() {
+//	uint8_t CAM_tx[] = { 'C', 'A', 'M', 'O', 'N' };
+//
+//	uint32_t size1 = 0;
+//	uint8_t rgb_img_size[6];
+////	data_rec1 = rrr;
+//	char log1[30];
+//	UART_Flush(&huart2);
+//	UART_Flush(&huart8);
+//	UART_Flush_DMA(&huart8);
+//	HAL_UART_Transmit(&RGB_UART1, CAM_tx, sizeof(CAM_tx), 1000);
+////	HAL_UART_Transmit(&NIR_UART1, CAM_tx, sizeof(CAM_tx), 1000);
+//
+//	if (HAL_OK
+//			== HAL_UART_Receive(&RGB_UART1, rgb_img_size, sizeof(rgb_img_size),
+//					7000)) {
+//		HAL_UART_Transmit(&DEBUG_UART1, (uint8_t*) "Image size is : ",
+//				sizeof("Image size is : "), 1000);
+//
+//		ptr1 = atoi((char*) rgb_img_size);
+//		data_rec1 = (uint8_t*) malloc(ptr1);
+////		HAL_UART_Receive_DMA(&RGB_UART1, rrr, ptr1);
+////		if(HAL_UART_Receive(&RGB_UART1, rrr, ptr1, 10000) == HAL_OK){
+//////					HAL_UART_Transmit(&RGB_UART, data_rec, ptr,1000);
+////			sprintf(log1 , "data size : %d received\n", ptr1);
+////				HAL_UART_Transmit(&DEBUG_UART1,log1, sizeof(log1), 1000);
+////				}
+//		int loop = 0;
+//
+//		char log1[20];
+//		uint16_t data_size = 4000;
+//		uint8_t temp[data_size];
+//		loop = ptr1 / data_size;
+//		HAL_UART_Transmit(&huart2, "\n\n********Reading Image data****\n",
+//				sizeof("\n\n********Reading Image data****\n") - 1, 1000);
+//		obc_ok =0;
+////		do{
+////			if(HAL_UART_Receive(&RGB_UART1, temp, sizeof(temp),1000) == HAL_OK){
+////
+//////				rrr[loop++]=  temp;
+////				loop--;
+//////				  sprintf(log1 , "%d \0", loop);
+////				HAL_UART_Transmit(&DEBUG_UART1, temp, sizeof(temp), 1000);
+////			}
+////		}while(loop>0);
+//////		loop =ptr1%10;
+////		do{
+////
+////			if(HAL_UART_Receive(&RGB_UART1, temp, sizeof(temp),1000) == HAL_OK){
+////
+////			//				rrr[loop++]=  temp;
+//////							loop--;
+////			//				  sprintf(log1 , "%d \0", loop);
+////							HAL_UART_Transmit(&DEBUG_UART1, temp, sizeof(temp), 1000);
+////
+////							if(temp == 0xd9) break;
+////						}
+////		}while(1);
+//		if (HAL_OK == HAL_UART_Receive_DMA(&huart8, rrr, ptr1-2)) {
+////
+//
+////			sprintf(log1 , "************************\n\n BUffer data size : %d received\n", ptr1);
+////		HAL_UART_Transmit(&DEBUG_UART1,log1, sizeof(log1), 1000);
+//
+////		HAL_UART_Transmit(&DEBUG_UART1, rrr, ptr1-1, 1000);
+//		}
+////		RGB_CAM = 1;
+//		//HAL_Delay(20000);
+//
+//	}
+//}
+//void OCP_EN1() {
+//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET);
+//	HAL_Delay(100);
+//}
+//void OCP_DISABLE() {
+//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET);
+//	HAL_Delay(100);
+//}
+//
+//void UART_Flush(UART_HandleTypeDef *huart) {
+//	__HAL_UART_FLUSH_DRREGISTER(huart);
+//}
+//void UART_Flush_DMA(UART_HandleTypeDef *huart) {
+//	// Disable UART DMA request
+//	__HAL_UART_DISABLE_IT(huart, UART_IT_RXNE);
+//
+//	// Abort any ongoing UART reception via DMA
+//	HAL_UART_AbortReceive(huart);
+//
+//	// Reset the UART receive state
+//	huart->RxState = HAL_UART_STATE_READY;
+//}
 //
 ///* USER CODE END PFP */
 //
@@ -117,100 +257,52 @@
 //  MX_UART4_Init();
 //  MX_SPI2_Init();
 //  /* USER CODE BEGIN 2 */
-////  int x=0;
-////	HAL_UART_Transmit(&huart8, tx, sizeof(tx), 1000);
-//////	HAL_UART_Transmit(&huart6, tx, sizeof(tx),1000);
-////	if (HAL_OK
-////			== HAL_UART_Receive(&huart8, rgb_img_size, sizeof(rgb_img_size),
-////					3000)) {
-////		HAL_UART_Transmit(&huart2, "Image size is : ",
-////				sizeof("Image size is : "), 1000);
-////
-////		HAL_UART_Transmit(&huart2, rgb_img_size, sizeof(rgb_img_size), 1000);
-////		ptr = atoi((char*) rgb_img_size);
-////		RGB_CAM = 1;
-////
-////	}
-////	if (HAL_OK
-////			== HAL_UART_Receive(&huart6, nir_img_size, sizeof(nir_img_size),
-////					3000)) {
-////		HAL_UART_Transmit(&huart2, "Image size is : ",
-////				sizeof("Image size is : "), 1000);
-////
-////		HAL_UART_Transmit(&huart2, nir_img_size, sizeof(nir_img_size), 1000);
-////		ptr = atoi(nir_img_size);
-////		NIR_CAM = 1;
-////
-////	}
-////  uint16_t kriti[] ={'0xff','0xd8','0xff','0xe0','0x00','0x10','0x4a','0x46','0x49','0x46','0x00','0x01'};
-////  Read_ID(&hspi2, GPIOB, GPIO_PIN_11, &data);
-////  write_to_file("/CAM.txt", kriti);
+//	HAL_UART_Transmit(&huart2, (uint8_t*) "Camera is starting",
+//			sizeof("Camera is starting"), 1000);
+//
 //  /* USER CODE END 2 */
 //
 //  /* Infinite loop */
 //  /* USER CODE BEGIN WHILE */
 //	while (1) {
-//		HAL_UART_Transmit(&huart2, (uint8_t*)"Camera is starting",sizeof ("Camera is starting"),1000);
+//
+////
+////		OBC_HANDSHAKE1();
+////		OBC_RX_FLAG1 = 0;
+////
+////		do {
+////			if (HAL_UART_Receive(&OBC_UART1, OBC_CMD_RX1, 7, 1000) == HAL_OK) {
+////				UART_Flush(&huart4);
+////
+////				if (OBC_CMD_RX1[0] == 0x53 && OBC_CMD_RX1[1] == 0x0C
+////						&& OBC_CMD_RX1[2] == 0x0A && OBC_CMD_RX1[3] == 0X0e
+////						&& OBC_CMD_RX1[4] == 0X01 && OBC_CMD_RX1[5] == 0X7e) {
+////					HAL_UART_Transmit(&OBC_UART1, OBC_CMD_RX1,
+////							sizeof(OBC_CMD_RX1), 1000);
+//////									OCP_EN1();
+////					OBC_RX_FLAG1 = 1;
+////					break;
+////				}
+////			}
+////		} while (1);
+////		myprintf("Data received from OBC\r\n");
+////		HAL_Delay(2000);
+//		//		while (!OBC_RX_FLAG) {
+////		//			myprintf("waiting for command from OBC.\r\n");
+////		//			HAL_Delay(1000);
+////		//		}
+//		OCP_EN1();
+//		IMAGE_CAPTURE1();
+////		if (obc_ok == 1){
+////			//HAL_UART_Transmit(&OBC_UART1,rrr, sizeof(rrr),1000);
+////		}
+////		HAL_Delay(1000);
+//
+////		IMAGE_CAPTURE1();
 //    /* USER CODE END WHILE */
 //
 //    /* USER CODE BEGIN 3 */
-////		IMAGE_CAPTURE();
-//		OBC_HANDSHAKE();
-////
-//		OBC_RX_FLAG = 0;
-//
-////		if(HAL_UART_Receive(&OBC_UART, OBC_CMD_RX, 7, 1000)== HAL_OK){
-////			OCP_EN();
-////			HAL_Delay(10);
-////		}
-//
-//		do {
-//			if(HAL_UART_Receive(&OBC_UART, OBC_CMD_RX, 7,1000) == HAL_OK){
-//
-//				if (OBC_CMD_RX[0] == 0x53 && OBC_CAM_RX[1] == 0x0C
-//								&& OBC_CAM_RX[2] == 0x0A && OBC_CAM_RX[3] == 0X0e
-//								&& OBC_CAM_RX[4] == 0X01 && OBC_CAM_RX[5] == 0X7e){
-//					HAL_UART_Transmit(&OBC_UART, OBC_CMD_RX,sizeof(OBC_CMD_RX), 1000);
-//				   OCP_EN();
-//				   OBC_RX_FLAG =1;
-//				break;
-//				}
-//			}
-//		}while(1);
-////		while (!OBC_RX_FLAG) {
-////			myprintf("waiting for command from OBC.\r\n");
-////			HAL_Delay(1000);
-////		}
-//		myprintf("Data received from OBC\r\n");
-//
-//		if (OBC_COMMAND[0] == 0x53 && OBC_COMMAND[1] == 0x0C
-//				&& OBC_COMMAND[2] == 0x0A && OBC_COMMAND[3] == 0X0e
-//				&& OBC_COMMAND[4] == 0X01 && OBC_COMMAND[5] == 0X7e) {
-//			HAL_UART_Transmit(&OBC_UART,(uint8_t*)"ACK",sizeof("ACK"), 1000);
-//			myprintf("command received from OBC\r\n");
-//			IMAGE_CAPTURE();
-//			HAL_Delay(10);
-////
-////				else if (OBC_COMMAND[0] == 0xac && OBC_COMMAND[1] == 0x0b && OBC_COMMAND[2] == 0x02) {
-////					myprintf("Command received to take photo and classify....\r\n");
-//////					uint32_t IMAGE_CAPTURE();
-////
-////					HAL_Delay(1);
-////				}
-//		} else {
-//			myprintf("Data not received \r\n");
-//			HAL_Delay(1);
-//		}
-//		if (rgb == 0 && nir == 0) {
-//			HAL_UART_Transmit(&DEBUG_UART, "Both images received\n",
-//					sizeof("Both images received\n"), 1000);
-//			break;
-//
-//			//  send to flash
-//		}
-//       HAL_Delay(100);
 //	}
-//
 //  /* USER CODE END 3 */
 //}
 //
@@ -450,6 +542,12 @@
 //  /* DMA1_Stream0_IRQn interrupt configuration */
 //  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
 //  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+//  /* DMA1_Stream2_IRQn interrupt configuration */
+//  HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 0, 0);
+//  HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+//  /* DMA1_Stream4_IRQn interrupt configuration */
+//  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
+//  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
 //  /* DMA1_Stream6_IRQn interrupt configuration */
 //  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
 //  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
@@ -481,14 +579,14 @@
 //  __HAL_RCC_GPIOE_CLK_ENABLE();
 //
 //  /*Configure GPIO pin Output Level */
-//  HAL_GPIO_WritePin(cs_GPIO_Port, cs_Pin, GPIO_PIN_RESET);
+//  HAL_GPIO_WritePin(GPIOB, cs_Pin|GPIO_PIN_4, GPIO_PIN_RESET);
 //
-//  /*Configure GPIO pin : cs_Pin */
-//  GPIO_InitStruct.Pin = cs_Pin;
+//  /*Configure GPIO pins : cs_Pin PB4 */
+//  GPIO_InitStruct.Pin = cs_Pin|GPIO_PIN_4;
 //  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 //  GPIO_InitStruct.Pull = GPIO_NOPULL;
 //  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-//  HAL_GPIO_Init(cs_GPIO_Port, &GPIO_InitStruct);
+//  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 //
 ///* USER CODE BEGIN MX_GPIO_Init_2 */
 ///* USER CODE END MX_GPIO_Init_2 */

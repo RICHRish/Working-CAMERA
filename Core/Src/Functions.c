@@ -56,7 +56,7 @@ uint8_t obc_data, rx_data[7],i;
 void OBC_HANDSHAKE() {
 	while (OBC_RX_FLAG != 1) {
 		if (HAL_UART_Receive(&huart4, &obc_data, 1, 1000) == HAL_OK) {
-			HAL_UART_Transmit(&DEBUG_UART, &obc_data, 1, 100);
+			HAL_UART_Transmit(&huart4, &obc_data, 1, 100);
 			rx_data[i++] = obc_data;
 			i = i % 8;
 			if (i == 7)
@@ -66,9 +66,9 @@ void OBC_HANDSHAKE() {
 	}
 	if (OBC_RX_FLAG == 1) {
 		HAL_UART_Transmit(&huart4, rx_data, sizeof(rx_data), 1000);
-		HAL_UART_Transmit(&DEBUG_UART, &rx_data, 1, 100);
-		}
+		HAL_UART_Transmit(&huart4, &rx_data, 1, 100);
 	}
+}
 //void OBC_HANDSHAKE() {
 //
 //	HAL_UART_Receive_IT(&OBC_UART, OBC_HANDSHAKE_RX, 5);
@@ -97,13 +97,16 @@ void OBC_HANDSHAKE() {
 uint32_t IMAGE_CAPTURE(){
 	uint8_t CAM_tx[] = { 'C', 'A', 'M', 'O', 'N' };
 	uint32_t size1=0;
+	UART_Flush(&huart2);
+		UART_Flush(&huart8);
+		UART_Flush_DMA(&huart8);
 
 
 	HAL_UART_Transmit(&RGB_UART, CAM_tx, sizeof(CAM_tx), 1000);
 	HAL_UART_Transmit(&NIR_UART, CAM_tx, sizeof(CAM_tx),1000);
 	if (HAL_OK
 			== HAL_UART_Receive(&RGB_UART, rgb_img_size, sizeof(rgb_img_size),
-					7000)) {
+					2000)) {
 		HAL_UART_Transmit(&DEBUG_UART,(uint8_t*) "Image size is : ",
 				sizeof("Image size is : "), 1000);
 
